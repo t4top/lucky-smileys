@@ -1,0 +1,25 @@
+{
+  "name": "lucky-smileys",
+  "version": "1.0.0",
+  "description": "A collection of 1000 uniquely generated smiley NFTs",
+  "license": "GPL-3.0-or-later",
+  "author": "t4top@aztemi",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/t4top/lucky-smileys.git"
+  },
+  "keywords": [
+    "NFT",
+    "Lucky",
+    "Smileys",
+    "NFTTalents"
+  ],
+  "bugs": {
+    "url": "https://github.com/t4top/lucky-smileys/issues"
+  },
+  "homepage": "https://github.com/t4top/lucky-smileys#readme"
+}
