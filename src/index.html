@@ -17,5 +17,71 @@
         We're sorry but this site doesn't work properly without JavaScript enabled. Please enable it to continue.
       </strong>
     </noscript>
+
+    <header>
+      <div class="title">Lucky Smileys</div>
+      <div class="menu">
+        <a href="#home">Home</a>
+        <a href="#attributes">Attributes</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </header>
+    <section id="home">
+      <div>
+        <div class="imgdiv"><img src="/android-chrome-512x512.png" alt="smileys animation gif" /></div>
+        <p>Lucky Smileys are <b>1000</b> handcrafted NFT smileys on <b>Rinkeby</b> Ethereum testnet.</p>
+        <p>
+          This NFTs collection was created as part of the
+          <a
+            href="https://philippsandner.medium.com/call-for-applications-for-nft-talents-an-18-week-mentoring-program-empowering-talent-for-ee48be501ea0"
+            title="NFT Talents"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            NFT Talents
+          </a>
+          program. Special thanks to the program organizers.
+        </p>
+        <p>
+          Mint yours for <b>0.02 ETH</b> per NFT. Get free ETH on Rinkeby testnet from the
+          <a href="https://rinkebyfaucet.com/" title="Rinkeby Faucet" target="_blank" rel="noopener noreferrer">
+            Rinkeby Faucet </a
+          >.
+        </p>
+        <p>Only <b>2</b> NFTs can be minted per wallet.</p>
+        <div id="loadingDiv">Loading...</div>
+        <div id="controldiv" hidden>
+          <div id="notrinkebydiv">
+            <p>Only <b>Rinkeby Testnet</b> supported.</p>
+            <p>Please change Ethereum network to Rinkeby Testnet.</p>
+          </div>
+          <div id="connectdiv">
+            <button onclick="connectWallet()">Connect Wallet</button>
+          </div>
+          <div id="mintdiv">
+            <div id="balancediv"><!-- Balance: 1.0345 ETH --></div>
+            <div>
+              <label for="amount">How many to mint? 1 or 2:</label>
+              <input type="number" id="amount" name="amount" maxlength="1" size="3" min="1" max="2" value="1" />
+            </div>
+            <div>
+              <button onclick="mint()">Mint</button>
+            </div>
+          </div>
+          <div id="errordiv"></div>
+          <div id="nftsLeft"><!-- # of 1000 Remaining --></div>
+        </div>
+      </div>
+    </section>
+    <section id="attributes">
+      <div class="sub_title">Attributes</div>
+      <p>Coming soon...</p>
+    </section>
+    <section id="faq">
+      <div class="sub_title">FAQ</div>
+      <p>Coming soon...</p>
+    </section>
+
+    <script type="module" src="/main.js"></script>
   </body>
 </html>
