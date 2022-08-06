@@ -1,21 +1,22 @@
 import "./style.css";
+import { ethers } from "ethers";
 import contractABI from "./contract/LuckySmileys_abi.json";
 import { CONTRACT_ADDRESS, RPC_ENDPOINT, RINKEBY_CHAINID, NFT_MAX_SUPPLY, MINT_FEE } from "./constant.js";
-import { ethers } from "ethers";
 
-const $ = id => document.getElementById(id);
-
-// control flags
 let isConnected = false;
 let isRinkeby = false;
-
+let nftContract = null;
 let ethProvider = null;
 let ethAccount = null;
 let ethBalance = 0;
 let numberOfNFTsLeft = NFT_MAX_SUPPLY;
 
+function $(id) {
+  return document.getElementById(id);
+}
+
 // UI updates
-const updateView = () => {
+function updateView() {
   const isRemaining = numberOfNFTsLeft > 0;
 
   $("notrinkebydiv").hidden = !(isRemaining && isConnected && !isRinkeby);
@@ -24,32 +25,36 @@ const updateView = () => {
 
   $("loadingDiv").hidden = true;
   $("controldiv").hidden = false;
-};
+}
 
 // show error message
-const showError = msg => {
+function showError(msg) {
   const errorDiv = $("errordiv");
   errorDiv.innerText = msg;
   $("successdiv").hidden = true;
   $("popupdiv").hidden = errorDiv.hidden = false;
-};
+}
 
 // show success message
-const showSuccess = msg => {
+function showSuccess(msg) {
   const successDiv = $("successdiv");
   successDiv.innerText = msg;
   $("errordiv").hidden = true;
   $("popupdiv").hidden = successDiv.hidden = false;
-};
+}
 
 // close message popup
-const closePopup = () => ($("popupdiv").hidden = true);
+function closePopup() {
+  return ($("popupdiv").hidden = true);
+}
 
 // web3 chain changed events handler
-const handleChainChanged = () => window.location.reload();
+function handleChainChanged() {
+  return window.location.reload();
+}
 
 // web3 connection changed events handler
-const handleAccountsChanged = accounts => {
+function handleAccountsChanged(accounts) {
   if (accounts && accounts.length) {
     ethAccount = accounts[0];
     isConnected = true;
@@ -69,20 +74,22 @@ const handleAccountsChanged = accounts => {
     isConnected = false;
   }
   updateView();
-};
+}
 
-const getRemainingNFTsCount = async () => {
+async function getRemainingNFTsCount() {
+  if (isConnected && !isRinkeby) return;
+
   // retrieve no of NFTs left from the contract
-  const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, ethProvider);
-  numberOfNFTsLeft = await contract.remainingSupply();
+  numberOfNFTsLeft = await nftContract.remainingSupply();
+
   $("nftsLeft").innerText =
     numberOfNFTsLeft > 0
       ? `${numberOfNFTsLeft} out of ${NFT_MAX_SUPPLY} NFTs remaining`
       : "Minting closed. All NFTs already minted.";
-};
+}
 
 // connect to Metamask
-const handleConnect = () => {
+function handleConnect() {
   if (typeof window.ethereum !== "undefined") {
     const { ethereum } = window;
 
@@ -102,10 +109,10 @@ const handleConnect = () => {
   } else {
     return showError("Please install MetaMask");
   }
-};
+}
 
 // mint NFT
-const handleMint = async () => {
+async function handleMint() {
   const mintAmount = $("amount").value || 1;
   const mintFee = MINT_FEE * mintAmount;
   if (mintAmount < 1 || mintAmount > 2)
@@ -120,7 +127,7 @@ const handleMint = async () => {
     mintBtn.disabled = true;
 
     const signer = ethProvider.getSigner(ethAccount);
-    const nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
+    nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
 
     const txn = await nftContract.mint(ethAccount, mintAmount, { value: ethers.utils.parseEther(mintFee.toString()) });
 
@@ -131,15 +138,16 @@ const handleMint = async () => {
         showSuccess(`Transaction confirmed. tx: ${resp.transactionHash}`);
       })
       .catch(err => console.error(err))
-      .finally(async () => {
-        await getRemainingNFTsCount();
+      .finally(() => {
         mintBtn.innerText = "Mint";
         mintBtn.disabled = false;
       });
-  }
-};
 
-const init = async () => {
+    await getRemainingNFTsCount();
+  }
+}
+
+async function init() {
   // button listeners
   $("connectbtn").addEventListener("click", handleConnect);
   $("mintbtn").addEventListener("click", handleMint);
@@ -167,8 +175,10 @@ const init = async () => {
     ethProvider = new ethers.providers.JsonRpcProvider(RPC_ENDPOINT);
   }
 
+  nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, ethProvider);
   await getRemainingNFTsCount();
+
   updateView();
-};
+}
 
 init();
