@@ -1,7 +1,7 @@
 import "./style.css";
 import { ethers } from "ethers";
 import contractABI from "./contract/LuckySmileys_abi.json";
-import { CONTRACT_ADDRESS, RPC_ENDPOINT, RINKEBY_CHAINID, NFT_MAX_SUPPLY, MINT_FEE } from "./constant.js";
+import { CONTRACT_ADDRESS, RPC_ENDPOINT, RINKEBY_CHAINID, NFT_MAX_SUPPLY, NFT_MINT_FEE } from "./constant.js";
 
 let isConnected = false;
 let isRinkeby = false;
@@ -81,7 +81,7 @@ async function getRemainingNFTsCount() {
 
   // retrieve no of NFTs left from the contract
   const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, rpcProvider);
-  numberOfNFTsLeft = await contract.remainingSupply();
+  numberOfNFTsLeft = await contract.remainingSupply(); // ToDo: Handle on error. It remains in Loading now.
 
   $("nftsLeft").innerText =
     numberOfNFTsLeft > 0
@@ -114,12 +114,12 @@ function handleConnect() {
 // mint NFT
 async function handleMint() {
   const mintAmount = $("amount").value || 1;
-  const mintFee = MINT_FEE * mintAmount;
+  const mintFee = NFT_MINT_FEE * mintAmount;
   if (mintAmount < 1 || mintAmount > 2)
     return showError("Mint amount should either be 1 or 2. Max of 2 NFTs alllowed per wallet.");
 
   if (ethBalance <= mintFee)
-    return showError(`Insufficient balance. 1 NFT is ${MINT_FEE} ETH + gas. Get free ETH from Rinkeby Faucet.`);
+    return showError(`Insufficient balance. 1 NFT is ${NFT_MINT_FEE} ETH + gas. Get free ETH from Rinkeby Faucet.`);
 
   if (ethAccount && metamaskProvider) {
     const mintBtn = $("mintbtn");
