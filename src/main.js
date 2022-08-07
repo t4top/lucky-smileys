@@ -141,9 +141,8 @@ async function handleMint() {
       .finally(() => {
         mintBtn.innerText = "Mint";
         mintBtn.disabled = false;
+        getRemainingNFTsCount();
       });
-
-    getRemainingNFTsCount();
   }
 }
 
