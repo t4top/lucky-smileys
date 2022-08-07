@@ -5,8 +5,8 @@ import { CONTRACT_ADDRESS, RPC_ENDPOINT, RINKEBY_CHAINID, NFT_MAX_SUPPLY, MINT_F
 
 let isConnected = false;
 let isRinkeby = false;
-let nftContract = null;
-let ethProvider = null;
+let metamaskProvider = null;
+let rpcProvider = null;
 let ethAccount = null;
 let ethBalance = 0;
 let numberOfNFTsLeft = NFT_MAX_SUPPLY;
@@ -59,7 +59,7 @@ function handleAccountsChanged(accounts) {
     ethAccount = accounts[0];
     isConnected = true;
 
-    ethProvider
+    metamaskProvider
       .getBalance(ethAccount)
       .then(_balance => {
         ethBalance = ethers.utils.formatEther(_balance);
@@ -77,10 +77,11 @@ function handleAccountsChanged(accounts) {
 }
 
 async function getRemainingNFTsCount() {
-  if (isConnected && !isRinkeby) return;
+  if (!rpcProvider) rpcProvider = new ethers.providers.JsonRpcProvider(RPC_ENDPOINT);
 
   // retrieve no of NFTs left from the contract
-  numberOfNFTsLeft = await nftContract.remainingSupply();
+  const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, rpcProvider);
+  numberOfNFTsLeft = await contract.remainingSupply();
 
   $("nftsLeft").innerText =
     numberOfNFTsLeft > 0
@@ -90,8 +91,9 @@ async function getRemainingNFTsCount() {
 
 // connect to Metamask
 function handleConnect() {
-  if (typeof window.ethereum !== "undefined") {
+  if (window.ethereum) {
     const { ethereum } = window;
+    metamaskProvider = new ethers.providers.Web3Provider(ethereum);
 
     ethereum
       .request({ method: "eth_requestAccounts" })
@@ -104,8 +106,6 @@ function handleConnect() {
           return console.error(err);
         }
       });
-
-    ethProvider = new ethers.providers.Web3Provider(ethereum);
   } else {
     return showError("Please install MetaMask");
   }
@@ -121,15 +121,15 @@ async function handleMint() {
   if (ethBalance <= mintFee)
     return showError(`Insufficient balance. 1 NFT is ${MINT_FEE} ETH + gas. Get free ETH from Rinkeby Faucet.`);
 
-  if (ethAccount && ethProvider) {
+  if (ethAccount && metamaskProvider) {
     const mintBtn = $("mintbtn");
     mintBtn.innerText = "Minting...";
     mintBtn.disabled = true;
 
-    const signer = ethProvider.getSigner(ethAccount);
-    nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
+    const signer = metamaskProvider.getSigner(ethAccount);
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
 
-    const txn = await nftContract.mint(ethAccount, mintAmount, { value: ethers.utils.parseEther(mintFee.toString()) });
+    const txn = await contract.mint(ethAccount, mintAmount, { value: ethers.utils.parseEther(mintFee.toString()) });
 
     txn
       .wait()
@@ -143,7 +143,7 @@ async function handleMint() {
         mintBtn.disabled = false;
       });
 
-    await getRemainingNFTsCount();
+    getRemainingNFTsCount();
   }
 }
 
@@ -154,7 +154,7 @@ async function init() {
   $("okbtn").addEventListener("click", closePopup);
 
   // metamask wallet initialization
-  if (typeof window.ethereum !== "undefined") {
+  if (window.ethereum) {
     const { ethereum } = window;
 
     ethereum.on("chainChanged", handleChainChanged);
@@ -163,7 +163,7 @@ async function init() {
     const chainId = await ethereum.request({ method: "eth_chainId" });
     isRinkeby = chainId === RINKEBY_CHAINID;
 
-    ethProvider = new ethers.providers.Web3Provider(ethereum);
+    metamaskProvider = new ethers.providers.Web3Provider(ethereum);
 
     if (!ethAccount) {
       ethereum
@@ -171,13 +171,9 @@ async function init() {
         .then(handleAccountsChanged)
         .catch(err => console.error(err));
     }
-  } else {
-    ethProvider = new ethers.providers.JsonRpcProvider(RPC_ENDPOINT);
   }
 
-  nftContract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, ethProvider);
   await getRemainingNFTsCount();
-
   updateView();
 }
 
