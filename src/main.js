@@ -130,6 +130,7 @@ async function handleMint() {
     const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
 
     const txn = await contract.mint(ethAccount, mintAmount, { value: ethers.utils.parseEther(mintFee.toString()) });
+    console.log("txn:", txn);
 
     txn
       .wait()
@@ -141,7 +142,7 @@ async function handleMint() {
       .finally(() => {
         mintBtn.innerText = "Mint";
         mintBtn.disabled = false;
-        getRemainingNFTsCount();
+        setTimeout(getRemainingNFTsCount, 10000);
       });
   }
 }
