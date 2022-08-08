@@ -87,6 +87,8 @@ async function getRemainingNFTsCount() {
     numberOfNFTsLeft > 0
       ? `${numberOfNFTsLeft} out of ${NFT_MAX_SUPPLY} NFTs remaining`
       : "Minting closed. All NFTs already minted.";
+
+  updateView();
 }
 
 // connect to Metamask
@@ -129,21 +131,22 @@ async function handleMint() {
     const signer = metamaskProvider.getSigner(ethAccount);
     const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
 
-    const txn = await contract.mint(ethAccount, mintAmount, { value: ethers.utils.parseEther(mintFee.toString()) });
-    console.log("txn:", txn);
+    try {
+      const txn = await contract.mint(ethAccount, mintAmount, { value: ethers.utils.parseEther(mintFee.toString()) }); // ToDo: Make then catch
+      console.log("txn:", txn);
+      const receipt = await txn.wait();
+      showSuccess(`Transaction confirmed. tx: ${receipt.transactionHash}`);
+      console.log("receipt:", receipt);
+      console.log("receipt.events:", receipt.events);
+      console.log("receipt.logs:", receipt.logs);
+    } catch (err) {
+      console.error(err);
+    }
 
-    txn
-      .wait()
-      .then(resp => {
-        console.log("logs:", resp.logs);
-        showSuccess(`Transaction confirmed. tx: ${resp.transactionHash}`);
-      })
-      .catch(err => console.error(err))
-      .finally(() => {
-        mintBtn.innerText = "Mint";
-        mintBtn.disabled = false;
-        setTimeout(getRemainingNFTsCount, 10000);
-      });
+    mintBtn.innerText = "Mint";
+    mintBtn.disabled = false;
+
+    getRemainingNFTsCount();
   }
 }
 
@@ -173,7 +176,7 @@ async function init() {
     }
   }
 
-  await getRemainingNFTsCount();
+  getRemainingNFTsCount();
   updateView();
 }
 
