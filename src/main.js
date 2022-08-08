@@ -1,4 +1,4 @@
-import "./style.css";
+import "./style.styl";
 import { ethers } from "ethers";
 import contractABI from "./contract/LuckySmileys_abi.json";
 import { CONTRACT_ADDRESS, RPC_ENDPOINT, RINKEBY_CHAINID, NFT_MAX_SUPPLY, NFT_MINT_FEE } from "./constant.js";

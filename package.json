@@ -27,6 +27,7 @@
   "homepage": "https://github.com/t4top/lucky-smileys#readme",
   "devDependencies": {
     "@vitejs/plugin-legacy": "^2.0.0",
+    "stylus": "^0.58.1",
     "vite": "^3.0.4"
   },
   "dependencies": {
