@@ -81,7 +81,7 @@ async function getRemainingNFTsCount() {
   if (!rpcProvider) rpcProvider = new ethers.providers.JsonRpcProvider(RPC_ENDPOINT);
 
   const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, rpcProvider);
-  numberOfNFTsLeft = await contract.remainingSupply(); // ToDo: Error handling
+  numberOfNFTsLeft = await contract.availableSupply(); // ToDo: Error handling
 
   $("nftsLeft").innerText =
     numberOfNFTsLeft > 0
