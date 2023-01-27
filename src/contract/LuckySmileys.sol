@@ -26,14 +26,15 @@ import "@aztemi/solidity-utils/contracts/RandomIDsGenerator.sol";
 /**
  * @title Lucky Smileys NFT Collection
  * @author t4top@aztemi
- * @dev Lucky Smileys is a collection of 1000 handcrafted NFT smileys on Rinkeby Ethereum testnet. They were made for NFT Talents Assignment.
+ * @dev Lucky Smileys is a collection of 1000 handcrafted NFT smileys. They were made for NFT Talents Assignment and deployed to Ethereum testnet.
  */
 
 contract LuckySmileys is ERC1155, Pausable, Ownable, RandomIDsGenerator {
 
-  uint256 public constant NFT_MAX_SUPPLY = 1000;
-  uint256 public constant NFT_MINT_FEE = 0.02 ether;
+  uint256 public constant MAX_SUPPLY = 1000;
+  uint256 public constant MINT_FEE = 0.02 ether;
   uint256 public constant MAX_PER_WALLET = 2;
+  uint256 public maxSupply = MAX_SUPPLY;
   string baseURI;
   uint256[] mintedNFTs;
   mapping(address => uint256) mintedNFTsOwners;
@@ -45,8 +46,16 @@ contract LuckySmileys is ERC1155, Pausable, Ownable, RandomIDsGenerator {
     uint256[] indexed _tokenIds
   );
 
-  constructor(string memory _baseURI) ERC1155("") RandomIDsGenerator(NFT_MAX_SUPPLY) {
+  constructor(string memory _baseURI) ERC1155("") RandomIDsGenerator(MAX_SUPPLY) {
     setBaseURI(_baseURI);
+  }
+
+  function name() public pure returns (string memory) {
+    return "Lucky Smileys";
+  }
+
+  function symbol() public pure returns (string memory) {
+    return "LS";
   }
 
   function mint(address toAddress, uint256 amount) external payable {
@@ -57,7 +66,7 @@ contract LuckySmileys is ERC1155, Pausable, Ownable, RandomIDsGenerator {
     if (msg.sender != owner()) {
       require(toAddress != address(0), "LuckySmileys: Mint address cannot be null.");
       require(mintedNFTsOwners[toAddress] + amount <= MAX_PER_WALLET, "LuckySmileys: Only 2 mints allowed per wallet.");
-      require(msg.value >= (NFT_MINT_FEE * amount), "LuckySmileys: Fund not enough.");
+      require(msg.value >= (MINT_FEE * amount), "LuckySmileys: Fund not enough.");
     }
 
     mintedNFTsOwners[toAddress] += amount;
@@ -86,13 +95,13 @@ contract LuckySmileys is ERC1155, Pausable, Ownable, RandomIDsGenerator {
   }
 
   // No of NFTs available for minting
-  function remainingSupply() external view returns (uint256) {
+  function availableSupply() external view returns (uint256) {
     return _remainingSupply();
   }
 
   // No of NFTs already minted
-  function mintedSupply() external view returns (uint256) {
-    return NFT_MAX_SUPPLY - _remainingSupply();
+  function totalSupply() external view returns (uint256) {
+    return MAX_SUPPLY - _remainingSupply();
   }
 
   function showAllMintedTokenIDs() public view onlyOwner returns (uint256[] memory) {
